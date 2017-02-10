@@ -1,5 +1,6 @@
 from search import *
 from nn_puzzle import *
+import heapq
 
 class AStar(Search):
 
@@ -53,6 +54,9 @@ class AStar(Search):
         return -1
         
 class BFS(Search):
+    def __init__(self, problem):
+        Search.__init__(self, problem)
+        self.open_list = []
 
     def search(self, initial_state):
         """Given an initial problem state, encode a search-tree
@@ -63,7 +67,35 @@ class BFS(Search):
          a search-tree node representing a goal state (if found)
          or None, if no goal is discovered"""
 
+        print("Initial State: ", initial_state)
+
+        node = (0, None, initial_state, None) # node = (depth, parent, state, action)
+
+        self.open_list.append(node)
+
+        heapq.heapify(self.open_list)
+
+        node = heapq.heappop(self.open_list)
+
+        while(not self.problem.isgoal(node[2])):
+            total_actions =  self.problem.actions(node[2])
+            for i in total_actions:
+                child_i = self.child_node(node, i)
+                heapq.heappush(self.open_list, child_i)
+            node = heapq.heappop(self.open_list)
+
+        self.print_Tree(node)
+
         return None
+
+    def print_Tree(self, child):
+        # node = (depth, parent, state, action)
+        node = child
+        print(node[2])
+        while(not node[0] == 0):
+            print (node[1])
+            node = node[1]
+
 
     def solution(self, node):
         """Returns the 'solution' for the specified node in the search tree.
@@ -83,7 +115,14 @@ class BFS(Search):
         """Create a child node for this search tree given a parent
         search tree node and an action to execute. Don't confuse nodes
         in the search-tree and verticies in the state-space graph."""
-        return None
+
+        result = self.problem.result(node[2], action)
+
+        c_state = result[0]
+
+        c_node = (node[0] + 1, node, c_state, action) # node = (depth, parent, state, action) 
+
+        return c_node
 
     def parent(self, node):
         """Return the parent of the specified node in the search tree"""
@@ -105,10 +144,9 @@ class BFS(Search):
 if __name__ == "__main__":
 
     puzzle = NNPuzzle(3)
-    initial = puzzle.get_shuffled_state(2)
-    solver = AStar(puzzle)
+    initial = puzzle.get_shuffled_state(20)
+    solver = BFS(puzzle)
     goal = solver.search(initial)
-    print("Initial State", initial)
-    print("Found goal")
-    for sa in solver.solution(goal):
-        puzzle.display(sa)
+    #print("Found goal")
+    #for sa in solver.solution(goal):
+        #puzzle.display(sa)
