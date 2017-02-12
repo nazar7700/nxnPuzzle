@@ -10,11 +10,16 @@ class AStar(Search):
 		self.closed_list = []
 	
 	def search(self, initial_state):
+		"""This is an implementation for the
+		A* search algorithm that takes in a
+		shuffled nxn puzzle and it attempts to
+		find the solution. You are guarenteed a
+		solution and it does it really efficiently"""
+
 		h = self.heuristic(initial_state)
 		node = (h, 0, None, initial_state, None) # node = (heuristic, depth, parent, state, action)
 		self.open_list.append(node)
 		heapq.heapify(self.open_list)
-		#node = heapq.heappop(self.open_list)
 
 		while (len(self.open_list) > 0):
 			node = heapq.heappop(self.open_list)
@@ -23,13 +28,17 @@ class AStar(Search):
 
 			self.closed_list.append(node)
 			total_actions = self.problem.actions(node[3])
+
 			for action in total_actions:
+
 				child_i = self.child_node(node, action)
+
 				if (self.is_in_list(self.closed_list, child_i)):
 					continue
-				if (not self.is_in_list(self.open_list, child_i)):
-					if(not self.is_in_list(self.closed_list, child_i)):
-						heapq.heappush(self.open_list, child_i)
+
+				elif (not self.is_in_list(self.open_list, child_i)):
+					heapq.heappush(self.open_list, child_i)
+
 				elif ((node[1]) >= child_i[1]):
 					continue
 				
@@ -81,23 +90,30 @@ class BFS(Search):
         self.open_list = []
 
     def search(self, initial_state):
-        node = (0, None, initial_state, None) # node = (depth, parent, state, action)
-
-        self.open_list.append(node)
-
-        heapq.heapify(self.open_list)
-
-        node = heapq.heappop(self.open_list)
-
-        while(not self.problem.isgoal(node[2])):
-            total_actions =  self.problem.actions(node[2])
-            for i in total_actions:
-                child_i = self.child_node(node, i)
-                heapq.heappush(self.open_list, child_i)
-            node = heapq.heappop(self.open_list)
+    	"""This implementation of BFS takes a given state
+    	of a shuffled nxn puzzle and searches for the move
+    	involving least amount of moves in order to get 
+    	to the goal state (solved puzzle). It is a slow
+    	method but is guarenteed to find the solution
+    	given enough time"""
 
 
-        return node
+    	node = (0, None, initial_state, None) # node = (depth, parent, state, action)
+
+    	self.open_list.append(node)
+
+    	heapq.heapify(self.open_list)
+
+    	node = heapq.heappop(self.open_list)
+
+    	while(not self.problem.isgoal(node[2])):
+    		total_actions =  self.problem.actions(node[2])
+    		for i in total_actions:
+    			child_i = self.child_node(node, i)
+    			heapq.heappush(self.open_list, child_i)
+    		node = heapq.heappop(self.open_list)
+
+    	return node
 
     def solution(self, node):
         path = []
@@ -128,7 +144,7 @@ class BFS(Search):
 if __name__ == "__main__":
 
     puzzle = NNPuzzle(3)
-    initial = puzzle.get_shuffled_state(1000000)
+    initial = puzzle.get_shuffled_state(100000)
     solver = AStar(puzzle)
     goal = solver.search(initial)
     print("Initial State", initial)
